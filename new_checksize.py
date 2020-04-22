@@ -5,41 +5,37 @@
 #describe:
 '''
 此脚本用于核对下载ont数据的大小，主要功能为，获取obs数据的文件的文件名和文件大小，整理好对应的格式，写在obs.txt中，通过合同
-编号获取本地的文件名称和大小，然后保存到 local.txt 文件中，最后对两个文件进行排序对比，输出文件的不同内容。
+编号获取本地的文件名称和大小，然后保存到 local.txt 文件中，最后对两个文件进行排序对比，输出不同的文件。
 '''
 
 import subprocess
 import re
 import os
-
-
+USER_PATH = "/home/liuy/DataCheckScript/record"
 try:
-    os.system("rm -rf obs.txt local.txt")
+    os.system("rm -rf local.txt obs.txt")
 except Exception as e:
-    print(e)
+    raise e
 
 project_name = input("请输入合同编号： ")
-
+# root_path = input("请输入项目所在服务器上的路径： ")
 class CheckFiles:
 
     def __init__(self):
         self.project = project_name
+        # self.RootPath = root_path
+        # self.RawPath = root_path + project_name
 
     def open_file(self,file,objs=None,methd="r"):
-        try:
-            if methd =="r":
-                #获取OBS的路径
-                with open(file,methd) as f:
-                    cell_path_list = f.readlines()
-                    return cell_path_list
-            elif methd =="a+":
-                with open(file,methd) as f1:
-                    for k,y in objs.items():
-                        f1.write(k + "\t"+y +"\n")
-                        # print(k,y)
-        except Exception:
-            print('path  is wrong')
-            return
+        if methd =="r":
+            #获取OBS的路径
+            with open(file,methd) as f:
+                cell_path_list = f.readlines()
+                return cell_path_list
+        elif methd =="a+":
+            with open(file,methd) as f1:
+                for k,y in objs.items():
+                    f1.write(k + "\t"+y +"\n")
 
     def get_obspath(self,cell_path_list):
          for cell_path in cell_path_list:
@@ -49,8 +45,7 @@ class CheckFiles:
             self.cell_path = cell_path.replace("\n","")
             self.myutils()
             self.filesize = dict(zip(self.path_list,self.fileSize_list))
-            self.open_file("obs.txt",objs=self.filesize,methd="a+")
-            print(self.filesize)
+            self.open_file("{}/{}_obs.txt".format(USER_PATH,self.project),objs=self.filesize,methd="a+")
 
 
     def myutils(self):
@@ -73,14 +68,8 @@ class CheckFiles:
                 pass
 
     def get_localpath(self):
-        try:
-            local_dic = {}
-            dir_item=os.walk(self.project)
-            if dir_item == None:
-                return
-        except Exception:
-            print("check your project is not exist")
-            return
+        local_dic = {}
+        dir_item=os.walk("/home/liuy/software/{}".format(self.project))
         for maindir,subdir,files in dir_item:
             #遍历所有的文件
             for file in files:
@@ -97,21 +86,18 @@ class CheckFiles:
 
     @staticmethod
     def diffile():
-        print("THE DIFFERENT :")
         print("-------------------------------------------")
-        os.system("cat ont.txt local.txt | sort | uniq -u")
+        os.system("cat %s/%s_obs.txt %s/%s_local.txt | sort | uniq -c | sort -n -k 1  | awk '{if($1==1)print $2,$3}'"%(USER_PATH,project_name,USER_PATH, project_name))
         print("--------------------------------------------")
 
 
 
 
-if __name__ == "__main__":
 
 
-    obj = CheckFiles()
-    cell_path_list = obj.open_file("ont.txt")
-    obj.get_obspath(cell_path_list)
-    local_dic = obj.get_localpath()
-    obj.open_file("local.txt",objs=local_dic,methd="a+")
-    CheckFiles.diffile()
-
+obj = CheckFiles()
+cell_path_list = obj.open_file("Obslist.txt")
+obj.get_obspath(cell_path_list)
+local_dic = obj.get_localpath()
+obj.open_file("{}/{}_local.txt".format(USER_PATH,project_name),objs=local_dic,methd="a+")
+CheckFiles.diffile()
