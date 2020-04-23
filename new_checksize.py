@@ -12,6 +12,7 @@ import subprocess
 import re
 import os
 USER_PATH = "/home/liuy/DataCheckScript/record"
+ROOT_PATH = input("请输入项目所在路径： ")
 try:
     os.system("rm -rf local.txt obs.txt")
 except Exception as e:
@@ -69,7 +70,7 @@ class CheckFiles:
 
     def get_localpath(self):
         local_dic = {}
-        dir_item=os.walk("/home/liuy/software/{}".format(self.project))
+        dir_item=os.walk("{}/{}".format(ROOT_PATH, self.project))
         for maindir,subdir,files in dir_item:
             #遍历所有的文件
             for file in files:
