@@ -12,13 +12,13 @@ import subprocess
 import re
 import os
 USER_PATH = "/home/liuy/DataCheckScript/record"
-ROOT_PATH = input("请输入项目所在路径： ")
+ROOT_PATH = input("请输入项目所在路径：（示例：/home/liuy/WHWLZ-123） ")
 try:
-    os.system("rm -rf local.txt obs.txt")
-except Exception as e:
-    raise e
+    project_name = ROOT_PATH.strip().split("/")[-1]
+except Exception:
+    print("路径输入不合法")
 
-project_name = input("请输入合同编号： ")
+# project_name = input("请输入合同编号： ")
 # root_path = input("请输入项目所在服务器上的路径： ")
 class CheckFiles:
 
